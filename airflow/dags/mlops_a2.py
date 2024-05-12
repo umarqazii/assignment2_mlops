@@ -53,6 +53,13 @@ def main():
 
     save_to_csv(articles, 'articles.csv')  # Use a relative path for the filename
 
+def cmd_commands():
+    os.system('dvc add airflow/articles/articles.csv')
+    os.system('git add airflow/articles/articles.csv.dvc')
+    os.system('git commit -m "change made in the file"')
+    os.system('git push origin main')
+    os.system('dvc push')
+
 # Define the DAG
 dag = DAG(
     'mlops_a2',
@@ -67,3 +74,12 @@ main_task = PythonOperator(
     python_callable=main,
     dag=dag
 )
+
+cmd_commands_task = PythonOperator(
+    task_id='cmd_commands',
+    python_callable=cmd_commands,
+    dag=dag
+)
+
+# Set the task dependencies
+main_task >> cmd_commands_task
